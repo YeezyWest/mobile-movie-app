@@ -1,50 +1,124 @@
-# Welcome to your Expo app 👋
+# 🎬 CinePlay — Mobile Movie App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A premium, cinematic mobile movie application built with **React Native** and **Expo**, powered by the **TMDB API**. Discover trending movies, search the full movie catalogue, and dive into rich movie detail pages.
 
-## Get started
+---
 
-1. Install dependencies
+## ✨ Features
 
-   ```bash
-   npm install
-   ```
+### 🏠 Home Screen
+- **Branded header** with the CinePlay logo and user profile
+- **Search bar** — tap to navigate to the full search screen
+- **Trending Hero** — immersive full-bleed featured movie with backdrop, rating badge, and "Watch Now" CTA
+- **Horizontal movie carousels** (Now Playing, Top Rated, Trending This Week)
+- **Pull-to-refresh** to reload all sections
 
-2. Start the app
+### 🔍 Search
+- **Live debounced search** (400ms) — results appear as you type
+- **3-column grid** of movie poster results
+- Friendly empty state and no-results state
 
-   ```bash
-   npx expo start
-   ```
+### 🎞️ Movie Detail Page
+- **Full-bleed backdrop** with deep gradient fade
+- **Poster + Title** overlapping the hero in a cinematic layout
+- **Stats bar** — Rating ⭐ · Year 📅 · Runtime ⏱ · Votes 👥
+- **Genre tags**, tagline, and full overview
+- **Movie Info card** — Status, Budget, Box Office
+- **"You May Also Like"** similar movies carousel
 
-In the output, you'll find options to open the app in a
+### 🗂️ Tab Navigation
+- Home · Search · Saved · Profile
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🏗️ Tech Stack
 
-## Get a fresh project
+| Layer | Technology |
+|---|---|
+| Framework | [Expo](https://expo.dev) (SDK 54) + Expo Router |
+| Language | TypeScript |
+| Styling | NativeWind (Tailwind CSS for RN) |
+| Data | [TMDB API](https://www.themoviedb.org/) |
+| Icons | `@expo/vector-icons` (Ionicons) |
+| Gradients | `expo-linear-gradient` |
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## 📁 Project Structure
+
+```
+mobile-movie-app/
+├── app/
+│   ├── (tabs)/
+│   │   ├── index.tsx       # Home screen
+│   │   ├── search.tsx      # Search screen
+│   │   ├── saved.tsx       # Saved screen (WIP)
+│   │   └── profile.tsx     # Profile screen (WIP)
+│   └── movies/
+│       └── [id].tsx        # Movie detail screen
+├── components/
+│   ├── SearchBar.tsx       # Dual-mode search input
+│   ├── TrendingHero.tsx    # Featured movie hero card
+│   ├── MovieSection.tsx    # Horizontal FlatList section
+│   └── MovieCard.tsx       # Movie poster + rating card
+├── services/
+│   ├── api.ts              # TMDB API calls & types
+│   └── useFetch.ts         # Generic data-fetching custom hook
+└── assets/images/
+    └── app-logo.png        # CinePlay logo
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🚀 Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+### 1. Clone the repo
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+git clone <repo-url>
+cd mobile-movie-app
+```
 
-## Join the community
+### 2. Install dependencies
 
-Join our community of developers creating universal apps.
+```bash
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 3. Set up environment variables
+
+Create a `.env` file in the root directory:
+
+```env
+EXPO_PUBLIC_TMDB_API_KEY=your_api_key
+EXPO_PUBLIC_TMDB_READ_ACCESS_TOKEN=your_read_access_token
+EXPO_PUBLIC_TMDB_BASE_URL=https://api.themoviedb.org/3
+EXPO_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
+```
+
+Get your free API key at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).
+
+### 4. Start the development server
+
+```bash
+npx expo start --clear
+```
+
+Scan the QR code with **Expo Go** on your phone (iOS or Android).
+
+---
+
+## 📌 Roadmap
+
+- [ ] Saved / Watchlist functionality
+- [ ] Profile screen
+- [ ] Movie trailer playback
+- [ ] Cast & crew section
+- [ ] Genre-based browsing
+
+---
+
+## 🙏 Acknowledgements
+
+- Movie data powered by [The Movie Database (TMDB)](https://www.themoviedb.org/)
+- Built with [Expo](https://expo.dev) and [React Native](https://reactnative.dev)
