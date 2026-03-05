@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 import { Stack } from "expo-router";
+import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect, useState } from 'react';
 import "./global.css";
 
@@ -10,6 +12,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync(Ionicons.font);
+      await SystemUI.setBackgroundColorAsync('#000000');
       setLoaded(true);
     }
     loadFonts();
@@ -18,9 +21,12 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <StatusBar style="light" />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
+      </Stack>
+    </>
   );
 }
