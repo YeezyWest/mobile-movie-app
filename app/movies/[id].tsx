@@ -1,25 +1,26 @@
+import MovieSection from "@/components/MovieSection";
+import { useSaveContext } from "@/context/SaveContext";
+import {
+    MovieDetails,
+    fetchMovieDetails,
+    fetchSimilarMovies,
+    getBackdropUrl,
+    getPosterUrl,
+} from "@/services/api";
+import useFetch from "@/services/useFetch";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import MovieSection from "@/components/MovieSection";
-import {
-  MovieDetails,
-  fetchMovieDetails,
-  fetchSimilarMovies,
-  getBackdropUrl,
-  getPosterUrl,
-} from "@/services/api";
-import useFetch from "@/services/useFetch";
 
 const formatRuntime = (minutes: number) => {
   if (!minutes) return "N/A";
@@ -43,6 +44,16 @@ export default function MovieDetailScreen() {
     () => fetchMovieDetails(Number(id))
   );
   const { data: similar } = useFetch(() => fetchSimilarMovies(Number(id)));
+  const { isSaved, saveMovie, unsaveMovie } = useSaveContext();
+
+  const handleSaveToggle = () => {
+    if (!movie) return;
+    if (isSaved(movie.id)) {
+      unsaveMovie(movie.id);
+    } else {
+      saveMovie(movie);
+    }
+  };
 
   if (loading || !movie) {
     return (
@@ -95,6 +106,15 @@ export default function MovieDetailScreen() {
             className="w-10 h-10 rounded-full bg-black/50 items-center justify-center"
           >
             <Ionicons name="arrow-back" size={22} color="white" />
+          </TouchableOpacity>
+
+          {/* Bookmark / Save button */}
+          <TouchableOpacity
+            onPress={handleSaveToggle}
+            style={{ position: 'absolute', top: insets.top + 8, right: 16 }}
+            className={`w-10 h-10 rounded-full items-center justify-center ${isSaved(movie.id) ? 'bg-[#AB8EFF]' : 'bg-black/50'}`}
+          >
+            <Ionicons name={isSaved(movie.id) ? "bookmark" : "bookmark-outline"} size={22} color="white" />
           </TouchableOpacity>
         </View>
 

@@ -60,7 +60,7 @@ export default function Index() {
           </View>
           <View className="w-10 h-10 rounded-full bg-gray-900 items-center justify-center border border-gray-800">
             <Image
-              source={require('@/assets/images/profile.png')}
+              source={require('@/assets/images/app-logo.png')}
               className="w-full h-full rounded-full"
             />
           </View>

@@ -10,10 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.west.movieapp",
       "icon": "./assets/images/app-logo.png",
       "backgroundColor": "#030014"
     },
     "android": {
+      "package": "com.west.movieapp",
       "adaptiveIcon": {
         "backgroundColor": "#030014",
         "foregroundImage": "./assets/images/app-logo.png"
