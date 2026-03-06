@@ -19,6 +19,14 @@ export interface Genre {
   name: string;
 }
 
+export interface Video {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+}
+
 export interface MovieDetails extends Movie {
   genres: Genre[];
   runtime: number;
@@ -106,5 +114,12 @@ export const fetchSimilarMovies = async (id: number): Promise<Movie[]> => {
   const response = await fetch(`${BASE_URL}/movie/${id}/similar?language=en-US`, { headers });
   if (!response.ok) throw new Error('Failed to fetch similar movies');
   const data: MovieResponse = await response.json();
+  return data.results;
+};
+
+export const fetchMovieVideos = async (id: number): Promise<Video[]> => {
+  const response = await fetch(`${BASE_URL}/movie/${id}/videos?language=en-US`, { headers });
+  if (!response.ok) throw new Error('Failed to fetch movie videos');
+  const data = await response.json();
   return data.results;
 };

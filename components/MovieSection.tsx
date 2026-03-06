@@ -1,5 +1,5 @@
 import { Movie } from '@/services/api';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import MovieCard from './MovieCard';
 
@@ -9,7 +9,10 @@ interface MovieSectionProps {
   onSeeAll?: () => void;
 }
 
-const MovieSection = ({ title, movies, onSeeAll }: MovieSectionProps) => {
+const MovieSection = React.memo(({ title, movies, onSeeAll }: MovieSectionProps) => {
+  const renderItem = useCallback(({ item }: { item: Movie }) => <MovieCard movie={item} />, []);
+  const keyExtractor = useCallback((item: Movie) => item.id.toString(), []);
+
   return (
     <View className="mt-8 px-4">
       <View className="flex-row items-center justify-between mb-4">
@@ -21,10 +24,11 @@ const MovieSection = ({ title, movies, onSeeAll }: MovieSectionProps) => {
 
       <FlatList
         data={movies}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={keyExtractor}
         horizontal
         showsHorizontalScrollIndicator={false}
-        renderItem={({ item }) => <MovieCard movie={item} />}
+        renderItem={renderItem}
+        removeClippedSubviews={true}
         contentContainerStyle={{ paddingRight: 16 }}
         initialNumToRender={5}
         maxToRenderPerBatch={5}
@@ -32,6 +36,6 @@ const MovieSection = ({ title, movies, onSeeAll }: MovieSectionProps) => {
       />
     </View>
   );
-};
+});
 
 export default MovieSection;

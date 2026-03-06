@@ -47,6 +47,9 @@ export default function SearchScreen() {
     };
   }, [query, handleSearch]);
 
+  const renderItem = useCallback(({ item }: { item: Movie }) => <MovieCard movie={item} />, []);
+  const keyExtractor = useCallback((item: Movie) => item.id.toString(), []);
+
   return (
     <SafeAreaView className="flex-1 bg-black">
       {/* Header */}
@@ -97,11 +100,15 @@ export default function SearchScreen() {
         ) : (
           <FlatList
             data={results}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={keyExtractor}
             numColumns={3}
             contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
             columnWrapperStyle={{ justifyContent: 'flex-start', gap: 8, marginBottom: 8 }}
-            renderItem={({ item }) => <MovieCard movie={item} />}
+            renderItem={renderItem}
+            removeClippedSubviews={true}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={10}
             showsVerticalScrollIndicator={false}
           />
         )}

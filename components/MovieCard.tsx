@@ -8,7 +8,7 @@ interface MovieCardProps {
   movie: Movie;
 }
 
-const MovieCard = ({ movie }: MovieCardProps) => {
+const MovieCard = React.memo(({ movie }: MovieCardProps) => {
   const router = useRouter();
   const posterUrl = getPosterUrl(movie.poster_path, 'w342');
   const rating = movie.vote_average.toFixed(1);
@@ -38,6 +38,6 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       </Text>
     </TouchableOpacity>
   );
-};
+});
 
 export default MovieCard;

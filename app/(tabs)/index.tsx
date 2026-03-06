@@ -4,7 +4,7 @@ import TrendingHero from "@/components/TrendingHero";
 import { fetchNowPlaying, fetchTopRated, fetchTrending } from "@/services/api";
 import useFetch from "@/services/useFetch";
 import { useRouter } from "expo-router";
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Image, RefreshControl, SafeAreaView, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
@@ -29,11 +29,15 @@ export default function Index() {
   const loading = trendingLoading;
   const featuredMovie = trendingMovies?.[0];
 
-  const onRefresh = () => {
+  const nowPlayingSliced = useMemo(() => nowPlayingMovies?.slice(0, 10) || [], [nowPlayingMovies]);
+  const topRatedSliced = useMemo(() => topRatedMovies?.slice(0, 10) || [], [topRatedMovies]);
+  const trendingSliced = useMemo(() => trendingMovies?.slice(1, 11) || [], [trendingMovies]);
+
+  const onRefresh = useCallback(() => {
     refetchTrending();
     refetchNowPlaying();
     refetchTopRated();
-  };
+  }, [refetchTrending, refetchNowPlaying, refetchTopRated]);
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -87,16 +91,16 @@ export default function Index() {
               />
             )}
 
-            {nowPlayingMovies && nowPlayingMovies.length > 0 && (
-              <MovieSection title="Now Playing" movies={nowPlayingMovies.slice(0, 10)} />
+            {nowPlayingSliced.length > 0 && (
+              <MovieSection title="Now Playing" movies={nowPlayingSliced} />
             )}
 
-            {topRatedMovies && topRatedMovies.length > 0 && (
-              <MovieSection title="Top Rated" movies={topRatedMovies.slice(0, 10)} />
+            {topRatedSliced.length > 0 && (
+              <MovieSection title="Top Rated" movies={topRatedSliced} />
             )}
 
-            {trendingMovies && trendingMovies.length > 1 && (
-              <MovieSection title="Trending This Week" movies={trendingMovies.slice(1, 11)} />
+            {trendingSliced.length > 0 && (
+              <MovieSection title="Trending This Week" movies={trendingSliced} />
             )}
           </>
         )}

@@ -1,26 +1,28 @@
 import MovieSection from "@/components/MovieSection";
 import { useSaveContext } from "@/context/SaveContext";
 import {
-    MovieDetails,
-    fetchMovieDetails,
-    fetchSimilarMovies,
-    getBackdropUrl,
-    getPosterUrl,
+  MovieDetails,
+  fetchMovieDetails,
+  fetchMovieVideos,
+  fetchSimilarMovies,
+  getBackdropUrl,
+  getPosterUrl,
 } from "@/services/api";
 import useFetch from "@/services/useFetch";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import YoutubeIframe from "react-native-youtube-iframe";
 
 const formatRuntime = (minutes: number) => {
   if (!minutes) return "N/A";
@@ -44,16 +46,44 @@ export default function MovieDetailScreen() {
     () => fetchMovieDetails(Number(id))
   );
   const { data: similar } = useFetch(() => fetchSimilarMovies(Number(id)));
+  const { data: videos } = useFetch(() => fetchMovieVideos(Number(id)));
   const { isSaved, saveMovie, unsaveMovie } = useSaveContext();
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const handleSaveToggle = () => {
+  const handleSaveToggle = useCallback(() => {
     if (!movie) return;
     if (isSaved(movie.id)) {
       unsaveMovie(movie.id);
     } else {
       saveMovie(movie);
     }
-  };
+  }, [movie, isSaved, saveMovie, unsaveMovie]);
+
+  const trailer = useMemo(() => {
+    if (!videos) return null;
+    return videos.find(
+      (v) => v.site === 'YouTube' && v.type === 'Trailer'
+    ) || videos.find(
+      (v) => v.site === 'YouTube' && v.type === 'Teaser'
+    );
+  }, [videos]);
+
+  const openTrailer = useCallback(() => {
+    if (trailer) setIsPlaying(true);
+  }, [trailer]);
+
+  const rating = movie?.vote_average.toFixed(1) ?? '0.0';
+  const year = movie?.release_date?.split('-')[0] ?? '';
+
+  const statItems = useMemo(() => {
+    if (!movie) return [];
+    return [
+      { label: 'Rating', value: rating, icon: 'star' as const, color: '#FFD700' },
+      { label: 'Year', value: year, icon: 'calendar-outline' as const, color: '#AB8EFF' },
+      { label: 'Runtime', value: formatRuntime(movie.runtime), icon: 'time-outline' as const, color: '#AB8EFF' },
+      { label: 'Votes', value: `${(movie.vote_count / 1000).toFixed(0)}K`, icon: 'people-outline' as const, color: '#AB8EFF' },
+    ];
+  }, [movie, rating, year]);
 
   if (loading || !movie) {
     return (
@@ -66,15 +96,6 @@ export default function MovieDetailScreen() {
 
   const backdropUrl = getBackdropUrl(movie.backdrop_path, 'w1280');
   const posterUrl = getPosterUrl(movie.poster_path, 'w500');
-  const rating = movie.vote_average.toFixed(1);
-  const year = movie.release_date?.split('-')[0] ?? '';
-
-  const statItems = [
-    { label: 'Rating', value: rating, icon: 'star' as const, color: '#FFD700' },
-    { label: 'Year', value: year, icon: 'calendar-outline' as const, color: '#AB8EFF' },
-    { label: 'Runtime', value: formatRuntime(movie.runtime), icon: 'time-outline' as const, color: '#AB8EFF' },
-    { label: 'Votes', value: `${(movie.vote_count / 1000).toFixed(0)}K`, icon: 'people-outline' as const, color: '#AB8EFF' },
-  ];
 
   return (
     <View className="flex-1 bg-black">
@@ -82,40 +103,82 @@ export default function MovieDetailScreen() {
 
         {/* ── HERO SECTION ── */}
         <View style={{ height: 360 }}>
-          {backdropUrl ? (
-            <Image
-              source={{ uri: backdropUrl }}
-              style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              resizeMode="cover"
-            />
+          {isPlaying && trailer ? (
+            <View style={{ flex: 1, backgroundColor: 'black', paddingTop: insets.top }}>
+               <YoutubeIframe
+                  height={300}
+                  play={isPlaying}
+                  videoId={trailer.key}
+                  onChangeState={(event: any) => {
+                    if (event === 'ended') setIsPlaying(false);
+                  }}
+               />
+               <TouchableOpacity
+                 onPress={() => setIsPlaying(false)}
+                 style={{ position: 'absolute', top: insets.top + 8, right: 16 }}
+                 className="w-10 h-10 rounded-full bg-black/50 items-center justify-center border border-white/20"
+               >
+                 <Ionicons name="close" size={22} color="white" />
+               </TouchableOpacity>
+            </View>
           ) : (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#1a172f' }} />
+            <>
+              {backdropUrl ? (
+                <Image
+                  source={{ uri: backdropUrl }}
+                  style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#1a172f' }} />
+              )}
+
+              {/* Deep gradient overlay */}
+              <LinearGradient
+                colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)', '#000000']}
+                locations={[0, 0.6, 1]}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+              />
+
+              {/* Play Trailer Button (Centered) */}
+              {trailer && (
+                <TouchableOpacity
+                  onPress={openTrailer}
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: [{ translateX: -32 }, { translateY: -32 }],
+                    shadowColor: '#AB8EFF',
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 12,
+                  }}
+                  className="w-16 h-16 rounded-full bg-black/60 items-center justify-center border border-white/20"
+                >
+                  <Ionicons name="play" size={32} color="white" style={{ marginLeft: 4 }} />
+                </TouchableOpacity>
+              )}
+
+              {/* Back button */}
+              <TouchableOpacity
+                onPress={() => router.back()}
+                style={{ position: 'absolute', top: insets.top + 8, left: 16 }}
+                className="w-10 h-10 rounded-full bg-black/50 items-center justify-center"
+              >
+                <Ionicons name="arrow-back" size={22} color="white" />
+              </TouchableOpacity>
+
+              {/* Bookmark / Save button */}
+              <TouchableOpacity
+                onPress={handleSaveToggle}
+                style={{ position: 'absolute', top: insets.top + 8, right: 16 }}
+                className={`w-10 h-10 rounded-full items-center justify-center ${isSaved(movie.id) ? 'bg-[#AB8EFF]' : 'bg-black/50'}`}
+              >
+                <Ionicons name={isSaved(movie.id) ? "bookmark" : "bookmark-outline"} size={22} color="white" />
+              </TouchableOpacity>
+            </>
           )}
-
-          {/* Deep gradient overlay */}
-          <LinearGradient
-            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)', '#000000']}
-            locations={[0, 0.6, 1]}
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-          />
-
-          {/* Back button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ position: 'absolute', top: insets.top + 8, left: 16 }}
-            className="w-10 h-10 rounded-full bg-black/50 items-center justify-center"
-          >
-            <Ionicons name="arrow-back" size={22} color="white" />
-          </TouchableOpacity>
-
-          {/* Bookmark / Save button */}
-          <TouchableOpacity
-            onPress={handleSaveToggle}
-            style={{ position: 'absolute', top: insets.top + 8, right: 16 }}
-            className={`w-10 h-10 rounded-full items-center justify-center ${isSaved(movie.id) ? 'bg-[#AB8EFF]' : 'bg-black/50'}`}
-          >
-            <Ionicons name={isSaved(movie.id) ? "bookmark" : "bookmark-outline"} size={22} color="white" />
-          </TouchableOpacity>
         </View>
 
         {/* ── MAIN CONTENT (overlaps hero with -mt) ── */}
